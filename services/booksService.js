@@ -8,6 +8,7 @@ const getBooks = (request, h) => {
 
         let filteredBooks = Books; // Create a copy of the Books array
 
+        // If the name query parameter is defined, then filter the books by name
         if (name !== undefined) {
             filteredBooks = filteredBooks.filter((book) => {
                 const bookName = book.name.toLowerCase();
@@ -25,9 +26,10 @@ const getBooks = (request, h) => {
                         })),
                     },
                 }
-            )
+            );
         }
 
+        // If the reading query parameter is defined, then filter the books by reading status
         if (reading !== undefined) {
             filteredBooks = filteredBooks.filter((book) => book.reading === (reading === "1"));
             return h.response({
@@ -39,9 +41,10 @@ const getBooks = (request, h) => {
                         publisher: book.publisher,
                     })),
                 },
-            })
+            });
         }
 
+        // If the finished query parameter is defined, then filter the books by finished status
         if (finished !== undefined) {
             filteredBooks = filteredBooks.filter((book) => book.finished === (finished === "1"));
             return h.response({
@@ -53,7 +56,7 @@ const getBooks = (request, h) => {
                         publisher: book.publisher,
                     })),
                 },
-            })
+            });
         }
 
         return h.response({
@@ -66,6 +69,7 @@ const getBooks = (request, h) => {
                 })),
             },
         }).code(200);
+
     } catch (err) {
         return h.response({
             status: "fail",
@@ -80,6 +84,7 @@ const getBookById = (request, h) => {
 
         const findBook = Books.find((book) => book.id === bookId);
 
+        // If the book is not found, then return a 404 response
         if (findBook === undefined) {
             return h.response({
                 status: "fail",
@@ -92,7 +97,7 @@ const getBookById = (request, h) => {
             data: {
                 book: findBook
             },
-        }
+        };
     }
     catch (err) {
         return h.response({
@@ -100,7 +105,7 @@ const getBookById = (request, h) => {
             message: err.message,
         }).code(500);
     }
-}
+};
 
 const addBook = (request, h) => {
     try {
@@ -108,6 +113,7 @@ const addBook = (request, h) => {
         const id = nanoid(16);
         const dateNow = new Date().toISOString();
 
+        // If the name is not defined, then return a 400 response
         if (bookData.name === undefined) {
             return h.response({
                 status: "fail",
@@ -115,6 +121,7 @@ const addBook = (request, h) => {
             }).code(400);
         }
 
+        // If the readPage is greater than pageCount, then return a 400 response
         if (bookData.readPage > bookData.pageCount) {
             return h.response({
                 status: "fail",
@@ -128,8 +135,9 @@ const addBook = (request, h) => {
             finished: bookData.readPage === bookData.pageCount,
             insertedAt: dateNow,
             updatedAt: dateNow,
-        }
+        };
 
+        // Add the new book to the Books array
         Books.push(createData);
 
         return h.response({
@@ -137,8 +145,9 @@ const addBook = (request, h) => {
             message: "Buku berhasil ditambahkan",
             data: {
                 bookId: id
-            }}).code(201);
-        
+            }
+        }).code(201);
+
     }
     catch (err) {
         return h.response({
@@ -146,7 +155,7 @@ const addBook = (request, h) => {
             message: err.message,
         }).code(500);
     }
-}
+};
 
 const updateBook = (request, h) => {
     try {
@@ -156,6 +165,7 @@ const updateBook = (request, h) => {
 
         const index = Books.findIndex((book) => book.id === bookId);
 
+        // If the book is not found, then return a 404 response
         if (index === -1) {
             return h.response({
                 status: "fail",
@@ -163,13 +173,15 @@ const updateBook = (request, h) => {
             }).code(404);
         }
 
-        if(bookData.name === undefined) {
+        // If the name is not defined, then return a 400 response
+        if (bookData.name === undefined) {
             return h.response({
                 status: "fail",
                 message: "Gagal memperbarui buku. Mohon isi nama buku"
             }).code(400);
         }
 
+        // If the readPage is greater than pageCount, then return a 400 response
         if (bookData.readPage > bookData.pageCount) {
             return h.response({
                 status: "fail",
@@ -184,7 +196,7 @@ const updateBook = (request, h) => {
                 ...bookData,
                 finished: true,
                 updatedAt,
-            }
+            };
         }
 
         // if the readPage is less than pageCount, then the book is not finished
@@ -192,14 +204,14 @@ const updateBook = (request, h) => {
             ...Books[index],
             ...bookData,
             updatedAt,
-        }
+        };
 
 
         // return some response if the book is successfully updated
         return {
             status: "success",
             message: "Buku berhasil diperbarui"
-        }
+        };
     }
     catch (err) {
         return h.response({
@@ -207,13 +219,14 @@ const updateBook = (request, h) => {
             message: err.message,
         }).code(500);
     }
-}
+};
 
 const deleteBook = (request, h) => {
     try {
         const { bookId } = request.params;
         const bookIndex = Books.findIndex((book) => book.id === bookId);
 
+        // If the book is not found, then return a 404 response
         if (bookId === undefined || bookIndex === -1) {
             return h.response({
                 status: "fail",
@@ -221,11 +234,12 @@ const deleteBook = (request, h) => {
             }).code(404);
         }
 
+        // Remove the book from the Books array
         Books.splice(bookIndex, 1);
         return {
             status: "success",
             message: "Buku berhasil dihapus"
-        }
+        };
     }
     catch (err) {
         console.log(err);
@@ -234,7 +248,7 @@ const deleteBook = (request, h) => {
             message: err.message,
         }).code(500);
     }
-}
+};
 
 
 module.exports = {
